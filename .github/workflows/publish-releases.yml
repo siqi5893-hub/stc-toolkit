@@ -1,4 +1,4 @@
-name: Publish v1, v2 and v3
+name: Publish STC Toolkit releases
 # Marketplace publisher: SiboXu
 
 on:
@@ -35,6 +35,12 @@ jobs:
           ref: v3
           path: v3
 
+      - name: Checkout v3.1
+        uses: actions/checkout@v4
+        with:
+          ref: v3.1
+          path: v3.1
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -54,6 +60,10 @@ jobs:
       - name: Package v3
         working-directory: v3
         run: vsce package --out ../stc-toolkit-0.3.0.vsix
+
+      - name: Package v3.1
+        working-directory: v3.1
+        run: vsce package --out ../stc-toolkit-0.3.1.vsix
 
       - name: Publish v1
         env:
@@ -83,4 +93,14 @@ jobs:
             gh release upload v3.0.0 stc-toolkit-0.3.0.vsix --clobber --repo "${{ github.repository }}"
           else
             gh release create v3.0.0 stc-toolkit-0.3.0.vsix --repo "${{ github.repository }}" --target v3 --title "v3" --notes "STC Toolkit v3 (0.3.0): K5-style editor toolbar with one-click Build, Flash and Build & Flash buttons, quieter workflow options, and improved configuration-first UX. STC32G144K246 still uses the official backend for the final programming step until extended native USB-HID support is complete."
+          fi
+
+      - name: Publish v3.1
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view v3.1.0 --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            gh release upload v3.1.0 stc-toolkit-0.3.1.vsix --clobber --repo "${{ github.repository }}"
+          else
+            gh release create v3.1.0 stc-toolkit-0.3.1.vsix --repo "${{ github.repository }}" --target v3.1 --title "v3.1" --notes "STC Toolkit v3.1 (0.3.1): one-click K5-style editor workflow plus automatic Keil HEX/IHX detection. The extension reads Keil OutputDirectory/OutputName, prefers firmware produced by the current build, falls back to common output folders, and shows the detected firmware in the VS Code status bar."
           fi

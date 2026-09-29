@@ -5,8 +5,13 @@
   "version": "0.1.0",
   "publisher": "local",
   "license": "MIT",
-  "engines": { "vscode": "^1.85.0" },
-  "categories": ["Other", "Programming Languages"],
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Programming Languages"
+  ],
   "activationEvents": [
     "workspaceContains:**/*.uvproj",
     "workspaceContains:**/*.uvprojx",
@@ -21,25 +26,69 @@
   "main": "./extension.js",
   "contributes": {
     "commands": [
-      { "command": "stcToolkit.build", "title": "STC: Build Project", "icon": "$(tools)" },
-      { "command": "stcToolkit.rebuild", "title": "STC: Rebuild Project", "icon": "$(sync)" },
-      { "command": "stcToolkit.flash", "title": "STC: Flash Firmware", "icon": "$(zap)" },
-      { "command": "stcToolkit.buildFlash", "title": "STC: Build & Flash", "icon": "$(rocket)" },
-      { "command": "stcToolkit.selectPort", "title": "STC: Select Serial Port" },
-      { "command": "stcToolkit.selectFirmware", "title": "STC: Select Firmware File" },
-      { "command": "stcToolkit.openOfficialIsp", "title": "STC: Open Official STC-ISP" },
-      { "command": "stcToolkit.showInfo", "title": "STC: Show Project / Device Info" }
+      {
+        "command": "stcToolkit.build",
+        "title": "STC: Build Project",
+        "icon": "$(tools)"
+      },
+      {
+        "command": "stcToolkit.rebuild",
+        "title": "STC: Rebuild Project",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "stcToolkit.flash",
+        "title": "STC: Flash Firmware",
+        "icon": "$(zap)"
+      },
+      {
+        "command": "stcToolkit.buildFlash",
+        "title": "STC: Build & Flash",
+        "icon": "$(rocket)"
+      },
+      {
+        "command": "stcToolkit.selectPort",
+        "title": "STC: Select Serial Port"
+      },
+      {
+        "command": "stcToolkit.selectFirmware",
+        "title": "STC: Select Firmware File"
+      },
+      {
+        "command": "stcToolkit.openOfficialIsp",
+        "title": "STC: Open Official STC-ISP"
+      },
+      {
+        "command": "stcToolkit.showInfo",
+        "title": "STC: Show Project / Device Info"
+      }
     ],
     "menus": {
       "commandPalette": [
-        { "command": "stcToolkit.build" },
-        { "command": "stcToolkit.rebuild" },
-        { "command": "stcToolkit.flash" },
-        { "command": "stcToolkit.buildFlash" },
-        { "command": "stcToolkit.selectPort" },
-        { "command": "stcToolkit.selectFirmware" },
-        { "command": "stcToolkit.openOfficialIsp" },
-        { "command": "stcToolkit.showInfo" }
+        {
+          "command": "stcToolkit.build"
+        },
+        {
+          "command": "stcToolkit.rebuild"
+        },
+        {
+          "command": "stcToolkit.flash"
+        },
+        {
+          "command": "stcToolkit.buildFlash"
+        },
+        {
+          "command": "stcToolkit.selectPort"
+        },
+        {
+          "command": "stcToolkit.selectFirmware"
+        },
+        {
+          "command": "stcToolkit.openOfficialIsp"
+        },
+        {
+          "command": "stcToolkit.showInfo"
+        }
       ]
     },
     "configuration": {
@@ -67,7 +116,11 @@
         },
         "stcToolkit.flash.backend": {
           "type": "string",
-          "enum": ["stcgal", "custom", "official"],
+          "enum": [
+            "stcgal",
+            "custom",
+            "official"
+          ],
           "default": "stcgal",
           "description": "Flashing backend. stcgal provides direct flashing for many common STC parts; custom runs a user command; official launches STC-ISP."
         },
@@ -78,7 +131,19 @@
         },
         "stcToolkit.flash.protocol": {
           "type": "string",
-          "enum": ["auto", "stc89", "stc12a", "stc12b", "stc12", "stc15a", "stc15", "stc8", "stc8d", "stc8g", "usb15"],
+          "enum": [
+            "auto",
+            "stc89",
+            "stc12a",
+            "stc12b",
+            "stc12",
+            "stc15a",
+            "stc15",
+            "stc8",
+            "stc8d",
+            "stc8g",
+            "usb15"
+          ],
           "default": "auto",
           "description": "stcgal protocol. Auto works for many UART targets; STC32 commonly maps to stc8d in stcgal."
         },
@@ -114,5 +179,13 @@
   },
   "scripts": {
     "test": "node --check extension.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/siqi5893-hub/stc-toolkit.git"
+  },
+  "homepage": "https://github.com/siqi5893-hub/stc-toolkit#readme",
+  "bugs": {
+    "url": "https://github.com/siqi5893-hub/stc-toolkit/issues"
   }
 }

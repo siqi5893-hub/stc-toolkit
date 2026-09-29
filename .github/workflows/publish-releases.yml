@@ -1,0 +1,87 @@
+name: Publish v1 and v2
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/publish-releases.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout v1
+        uses: actions/checkout@v4
+        with:
+          ref: v1
+          path: v1
+
+      - name: Checkout v2
+        uses: actions/checkout@v4
+        with:
+          ref: v2
+          path: v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install VSCE
+        run: npm install -g @vscode/vsce
+
+      - name: Package v1
+        working-directory: v1
+        run: vsce package --out ../stc-toolkit-0.1.0.vsix
+
+      - name: Package v2
+        working-directory: v2
+        run: vsce package --out ../stc-toolkit-0.2.0.vsix
+
+      - name: Publish v1 release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view v1.0.0 >/dev/null 2>&1; then
+            gh release upload v1.0.0 stc-toolkit-0.1.0.vsix --clobber
+          else
+            gh release create v1.0.0 stc-toolkit-0.1.0.vsix \
+              --repo "${{ github.repository }}" \
+              --target v1 \
+              --title "v1" \
+              --notes "STC Toolkit v1 (0.1.0)
+
+Initial public release:
+- Keil project detection
+- Build / Rebuild
+- stcgal-based flashing for common legacy STC families
+- Custom flash backend
+- Official STC-ISP launcher fallback"
+          fi
+
+      - name: Publish v2 release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view v2.0.0 >/dev/null 2>&1; then
+            gh release upload v2.0.0 stc-toolkit-0.2.0.vsix --clobber
+          else
+            gh release create v2.0.0 stc-toolkit-0.2.0.vsix \
+              --repo "${{ github.repository }}" \
+              --target v2 \
+              --title "v2" \
+              --notes "STC Toolkit v2 (0.2.0)
+
+Second public release:
+- Multi-backend architecture
+- Backward-compatible stcgal support for legacy STC devices
+- Experimental native USB-HID backend
+- Official-tool fallback for STC32G144K246 and other new/large-flash devices
+- Automatic backend selection
+- English-first bilingual documentation"
+          fi

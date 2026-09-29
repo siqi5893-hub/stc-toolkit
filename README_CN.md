@@ -130,6 +130,27 @@ UV4.exe -r project.uvproj
 
 ## 固件自动发现
 
+### HEX 自动检测
+
+正常情况下**不需要手动填写固件路径**。
+
+STC Toolkit 会按以下优先级自动识别固件：
+
+1. 如果你主动配置了 `stcToolkit.firmwareFile`，优先使用该文件。
+2. 自动读取当前 Keil `.uvproj/.uvprojx` 中的 `OutputDirectory` 和 `OutputName`。
+3. 优先匹配该 Target 实际生成的 `.hex/.ihx/.ihex`。
+4. 如果工程信息不足，再扫描 `out_file`、`Objects`、`Output`、`build`、`bin` 等常见输出目录。
+5. 每次 Build 后优先选择本次编译刚更新的固件，避免误烧其他 Target 的旧 HEX。
+
+检测到的固件名称会直接显示在 VS Code 左下角的 **STC** 状态栏按钮旁。
+
+也可以手动检查：
+
+```text
+STC: Detect Firmware Automatically
+```
+
+
 编译完成后自动寻找最新：
 
 ```text

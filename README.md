@@ -8,6 +8,16 @@ The project follows one rule:
 
 > **Keep backward compatibility for older STC devices, but do not force newer devices to use legacy protocols.**
 
+## Localized UI
+
+STC Toolkit now follows the VS Code display language.
+
+- English VS Code → English command names and settings descriptions
+- 简体中文 VS Code → 中文命令和中文设置说明
+- 繁體中文 VS Code → 繁體中文命令和設定說明
+
+This applies directly to the **Extension Settings** page, so users do not need to keep the README open just to understand what each option does.
+
 ## Features
 
 - Auto-detect Keil `.uvproj` / `.uvprojx` projects

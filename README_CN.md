@@ -57,6 +57,8 @@ Device
 
 ## 编译
 
+> **说明：** 本文中的路径均为示例，请替换为你电脑上的实际安装路径，不要直接照抄。
+
 默认调用：
 
 ```text
@@ -73,7 +75,7 @@ UV4.exe -r project.uvproj
 
 ```json
 {
-  "stcToolkit.keil.uv4Path": "C:\\Keil_v5\\UV4\\UV4.exe"
+  "stcToolkit.keil.uv4Path": "C:\\Path\\To\\Keil_v5\\UV4\\UV4.exe"
 }
 ```
 
@@ -172,7 +174,7 @@ pip install hidapi
 ```json
 {
   "stcToolkit.flash.backend": "official",
-  "stcToolkit.officialIspPath": "E:\\Chrome\\stc-isp6.96s\\STC-ISP-v6.96S.exe"
+  "stcToolkit.officialIspPath": "C:\\Path\\To\\STC-ISP\\STC-ISP-v6.96S.exe"
 }
 ```
 
@@ -221,7 +223,7 @@ STC: Show Project / Device Info
 ```json
 {
   "stcToolkit.flash.backend": "auto",
-  "stcToolkit.officialIspPath": "E:\\Chrome\\stc-isp6.96s\\STC-ISP-v6.96S.exe"
+  "stcToolkit.officialIspPath": "C:\\Path\\To\\STC-ISP\\STC-ISP-v6.96S.exe"
 }
 ```
 

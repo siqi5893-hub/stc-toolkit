@@ -74,3 +74,8 @@ VS Code 设置中搜索 `STC Toolkit`。
 ## 设计取舍
 
 这个原型借鉴了现有 STC VS Code 扩展“在 VS Code 管理 Keil 工程”的产品思路，但代码为独立实现，没有复制其源码。烧录层优先使用可自动化的 `stcgal`，避免把 GUI 点击自动化当成稳定 ISP 接口。
+
+
+## License
+
+STC Toolkit is released under the [MIT License](./LICENSE). See [NOTICE.md](./NOTICE.md) for third-party software, trademark, affiliation, and hardware-programming notices.

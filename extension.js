@@ -11,6 +11,11 @@ let status;
 let extensionPath = '';
 
 function cfg() { return vscode.workspace.getConfiguration('stcToolkit'); }
+function notifySuccess(message) {
+  if (cfg().get('ui.showSuccessNotifications', true)) {
+    vscode.window.showInformationMessage(message);
+  }
+}
 function root() {
   const f = vscode.workspace.workspaceFolders?.[0];
   if (!f) throw new Error('请先打开一个工程文件夹 / Open a project folder first.');
@@ -100,7 +105,7 @@ async function build(rebuild=false) {
     }
     const fw = await newestFirmware().catch(() => null);
     status.text = fw ? `$(check) ${path.basename(fw)}` : '$(check) STC Build';
-    vscode.window.showInformationMessage(fw ? `编译完成 / Build complete: ${path.basename(fw)}` : '编译完成 / Build complete.');
+    notifySuccess(fw ? `编译完成 / Build complete: ${path.basename(fw)}` : '编译完成 / Build complete.');
     return true;
   } finally {
     if (status.text.includes('spin')) status.text = '$(chip) STC';
@@ -213,7 +218,7 @@ async function flashWithOfficial(info, firmware) {
   output.appendLine(`Backend: official STC-ISP/AiCube | Family: ${info.family}`);
   output.appendLine(`Firmware: ${firmware}`);
   await openOfficialIsp();
-  vscode.window.showInformationMessage('已打开官方 STC-ISP/AiCube。新版/大容量芯片目前交由官方 ISP 处理；插件保留自动后端选择和后续原生 HID 扩展接口。 / Official STC-ISP/AiCube opened for new or large-flash devices.');
+  notifySuccess('已打开官方 STC-ISP/AiCube。新版/大容量芯片目前交由官方 ISP 处理；插件保留自动后端选择和后续原生 HID 扩展接口。 / Official STC-ISP/AiCube opened for new or large-flash devices.');
 }
 
 async function flash() {
@@ -242,7 +247,7 @@ async function flash() {
       throw new Error(`Unknown backend: ${backend}`);
     }
     status.text = `$(check) ${path.basename(firmware)}`;
-    vscode.window.showInformationMessage(`烧录完成 / Flash complete: ${path.basename(firmware)}`);
+    notifySuccess(`烧录完成 / Flash complete: ${path.basename(firmware)}`);
   } finally {
     if (status.text.includes('spin')) status.text = '$(chip) STC';
   }
@@ -296,8 +301,8 @@ function activate(context) {
   extensionPath = context.extensionPath;
   output = vscode.window.createOutputChannel('STC Toolkit');
   status = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 50);
-  status.text = '$(chip) STC';
-  status.tooltip = 'STC Toolkit — Build & Flash';
+  status.text = '$(rocket) STC';
+  status.tooltip = 'STC Toolkit — One-click Build & Flash';
   status.command = 'stcToolkit.buildFlash';
   status.show();
 

@@ -1,8 +1,8 @@
 {
   "name": "stc-toolkit",
-  "displayName": "STC Toolkit",
-  "description": "Unified VS Code build/flash workflow for common STC MCUs: legacy stcgal + new-generation STC-ISP/AiCube + experimental native USB HID.",
-  "version": "0.3.1",
+  "displayName": "%extension.displayName%",
+  "description": "%extension.description%",
+  "version": "0.3.2",
   "publisher": "SiboXu",
   "license": "MIT",
   "engines": {
@@ -30,72 +30,72 @@
     "commands": [
       {
         "command": "stcToolkit.build",
-        "title": "STC: Build Project",
+        "title": "%command.build%",
         "icon": "$(tools)"
       },
       {
         "command": "stcToolkit.rebuild",
-        "title": "STC: Rebuild Project",
+        "title": "%command.rebuild%",
         "icon": "$(sync)"
       },
       {
         "command": "stcToolkit.flash",
-        "title": "STC: Flash Firmware",
+        "title": "%command.flash%",
         "icon": "$(zap)"
       },
       {
         "command": "stcToolkit.buildFlash",
-        "title": "STC: Build & Flash",
+        "title": "%command.buildFlash%",
         "icon": "$(rocket)"
       },
       {
         "command": "stcToolkit.selectBackend",
-        "title": "STC: Select Flash Backend"
+        "title": "%command.selectBackend%"
       },
       {
         "command": "stcToolkit.selectPort",
-        "title": "STC: Select Serial Port"
+        "title": "%command.selectPort%"
       },
       {
         "command": "stcToolkit.detectFirmware",
-        "title": "STC: Detect Firmware Automatically",
+        "title": "%command.detectFirmware%",
         "icon": "$(search-fuzzy)"
       },
       {
         "command": "stcToolkit.selectFirmware",
-        "title": "STC: Select Firmware File"
+        "title": "%command.selectFirmware%"
       },
       {
         "command": "stcToolkit.openOfficialIsp",
-        "title": "STC: Open Official STC-ISP / AiCube"
+        "title": "%command.openOfficialIsp%"
       },
       {
         "command": "stcToolkit.showInfo",
-        "title": "STC: Show Project / Device Info"
+        "title": "%command.showInfo%"
       }
     ],
     "configuration": {
-      "title": "STC Toolkit",
+      "title": "%config.title%",
       "properties": {
         "stcToolkit.projectFile": {
           "type": "string",
           "default": "",
-          "description": "Keil .uvproj/.uvprojx path. Leave empty to auto-detect."
+          "description": "%config.projectFile.description%"
         },
         "stcToolkit.keil.uv4Path": {
           "type": "string",
           "default": "",
-          "description": "Path to UV4.exe for Keil C51/C251 builds."
+          "description": "%config.keilUv4Path.description%"
         },
         "stcToolkit.build.customCommand": {
           "type": "string",
           "default": "",
-          "description": "Optional custom build command. Supports ${workspaceFolder} and ${projectFile}."
+          "description": "%config.buildCustomCommand.description%"
         },
         "stcToolkit.firmwareFile": {
           "type": "string",
           "default": "",
-          "description": "Optional firmware override. Leave empty to automatically detect HEX/IHX from the Keil project output and workspace."
+          "description": "%config.firmwareFile.description%"
         },
         "stcToolkit.flash.backend": {
           "type": "string",
@@ -107,12 +107,19 @@
             "custom"
           ],
           "default": "auto",
-          "description": "Auto selects stcgal for legacy families and official/native paths for newer devices."
+          "description": "%config.flashBackend.description%",
+          "enumDescriptions": [
+            "%config.flashBackend.auto%",
+            "%config.flashBackend.stcgal%",
+            "%config.flashBackend.nativeHid%",
+            "%config.flashBackend.official%",
+            "%config.flashBackend.custom%"
+          ]
         },
         "stcToolkit.flash.stcgalPath": {
           "type": "string",
           "default": "stcgal",
-          "description": "stcgal executable/command."
+          "description": "%config.stcgalPath.description%"
         },
         "stcToolkit.flash.protocol": {
           "type": "string",
@@ -130,74 +137,74 @@
             "usb15"
           ],
           "default": "auto",
-          "description": "stcgal protocol override."
+          "description": "%config.flashProtocol.description%"
         },
         "stcToolkit.flash.port": {
           "type": "string",
           "default": "",
-          "description": "Serial port such as COM3 for UART ISP backends."
+          "description": "%config.flashPort.description%"
         },
         "stcToolkit.flash.baud": {
           "type": "number",
           "default": 115200,
           "minimum": 1200,
           "maximum": 3000000,
-          "description": "Programming baud rate for stcgal."
+          "description": "%config.flashBaud.description%"
         },
         "stcToolkit.flash.autoreset": {
           "type": "boolean",
           "default": false,
-          "description": "Pass -a to stcgal for DTR/RTS auto reset."
+          "description": "%config.flashAutoreset.description%"
         },
         "stcToolkit.flash.pythonPath": {
           "type": "string",
           "default": "",
-          "description": "Python command/path used by the experimental native HID backend. Empty = auto-detect."
+          "description": "%config.pythonPath.description%"
         },
         "stcToolkit.flash.nativeHidExperimental": {
           "type": "boolean",
           "default": false,
-          "description": "Enable the experimental direct USB HID ISP backend. It intentionally refuses addresses above 0xFFFF."
+          "description": "%config.nativeHidExperimental.description%"
         },
         "stcToolkit.flash.nativeHidAutoReset": {
           "type": "boolean",
           "default": false,
-          "description": "Before native HID flashing, try to send the user reset-to-ISP command on VID 34BF / PID FF01."
+          "description": "%config.nativeHidAutoReset.description%"
         },
         "stcToolkit.flash.nativeHidResetCommand": {
           "type": "string",
           "default": "@STCISP#",
-          "description": "User command used to request reset into ISP mode."
+          "description": "%config.nativeHidResetCommand.description%"
         },
         "stcToolkit.flash.customCommand": {
           "type": "string",
           "default": "",
-          "description": "Custom flash command. Supports ${firmware}, ${port}, ${protocol}, ${workspaceFolder}, ${projectFile}, ${device}."
+          "description": "%config.flashCustomCommand.description%"
         },
         "stcToolkit.officialIspPath": {
           "type": "string",
           "default": "",
-          "description": "Path to official STC-ISP/AiCube executable. Recommended for newest/large-flash STC parts."
+          "description": "%config.officialIspPath.description%"
         },
         "stcToolkit.ui.showEditorButtons": {
           "type": "boolean",
           "default": true,
-          "description": "Show Build, Flash and Build & Flash buttons in the editor title bar for C/C++ files."
+          "description": "%config.showEditorButtons.description%"
         },
         "stcToolkit.ui.showSuccessNotifications": {
           "type": "boolean",
           "default": true,
-          "description": "Show success notifications after build/flash. Disable for a quieter one-click workflow."
+          "description": "%config.showSuccessNotifications.description%"
         },
         "stcToolkit.firmware.autoDetect": {
           "type": "boolean",
           "default": true,
-          "description": "Automatically detect the firmware file from Keil OutputDirectory/OutputName and common build folders. Recommended."
+          "description": "%config.firmwareAutoDetect.description%"
         },
         "stcToolkit.firmware.preferFreshBuild": {
           "type": "boolean",
           "default": true,
-          "description": "After Build, prefer firmware files created or updated by the current build to avoid flashing stale HEX files."
+          "description": "%config.preferFreshBuild.description%"
         }
       }
     },

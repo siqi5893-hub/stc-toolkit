@@ -17,6 +17,9 @@ permissions:
   contents: read
   id-token: write
 
+env:
+  VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
 jobs:
   publish:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
@@ -39,13 +42,13 @@ jobs:
       - name: Package VSIX
         run: npx --yes @vscode/vsce@latest package --out stc-toolkit-marketplace.vsix
 
-      - name: Publish to Visual Studio Marketplace with OIDC
-        continue-on-error: true
-        run: npx --yes @vscode/vsce@latest publish --packagePath stc-toolkit-marketplace.vsix --oidc --skip-duplicate
+      - name: Publish to Visual Studio Marketplace
+        if: env.VSCE_PAT != ''
+        run: npx --yes @vscode/vsce@latest publish --packagePath stc-toolkit-marketplace.vsix --skip-duplicate
 
-      - name: Setup hint
-        if: always()
+      - name: Missing Marketplace credential
+        if: env.VSCE_PAT == ''
         run: |
-          echo "Marketplace publishing uses GitHub OIDC trusted publishing."
-          echo "No VSCE_PAT is stored in this repository."
-          echo "If the publish step failed, configure this repository/workflow as a trusted publisher in the Visual Studio Marketplace publisher settings."
+          echo "::warning::VSCE_PAT is not configured. GitHub Release packaging succeeded, but Marketplace publishing was skipped."
+          echo "Add VSCE_PAT under Repository Settings -> Secrets and variables -> Actions."
+          echo "The token needs Visual Studio Marketplace (Manage) permission."

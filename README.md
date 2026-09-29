@@ -36,12 +36,12 @@ VS Code 设置中搜索 `STC Toolkit`。
 
 ```json
 {
-  "stcToolkit.keil.uv4Path": "C:\\Keil_v5\\UV4\\UV4.exe",
+  "stcToolkit.keil.uv4Path": "C:\\Path\\To\\Keil_v5\\UV4\\UV4.exe",
   "stcToolkit.flash.backend": "stcgal",
   "stcToolkit.flash.stcgalPath": "stcgal",
   "stcToolkit.flash.protocol": "auto",
   "stcToolkit.flash.port": "COM3",
-  "stcToolkit.officialIspPath": "E:\\Chrome\\stc-isp6.96s\\STC-ISP-v6.96S.exe"
+  "stcToolkit.officialIspPath": "C:\\Path\\To\\STC-ISP\\STC-ISP-v6.96S.exe"
 }
 ```
 

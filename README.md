@@ -252,6 +252,8 @@ without opening the official GUI.
 
 ## License
 
-MIT for the extension code.
+STC Toolkit is released under the [MIT License](./LICENSE).
 
-External tools such as **stcgal**, **Keil**, **STC-ISP**, and **AiCube** keep their own licenses and are not bundled unless explicitly stated.
+See [NOTICE.md](./NOTICE.md) for third-party software, trademark, affiliation, and hardware-programming notices.
+
+External tools and proprietary binaries are not relicensed by STC Toolkit and remain subject to their own terms.

@@ -1,4 +1,4 @@
-name: Publish v1 and v2
+name: Publish v1, v2 and v3
 # Marketplace publisher: SiboXu
 
 on:
@@ -29,6 +29,12 @@ jobs:
           ref: v2
           path: v2
 
+      - name: Checkout v3
+        uses: actions/checkout@v4
+        with:
+          ref: v3
+          path: v3
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -44,6 +50,10 @@ jobs:
       - name: Package v2
         working-directory: v2
         run: vsce package --out ../stc-toolkit-0.2.0.vsix
+
+      - name: Package v3
+        working-directory: v3
+        run: vsce package --out ../stc-toolkit-0.3.0.vsix
 
       - name: Publish v1
         env:
@@ -63,4 +73,14 @@ jobs:
             gh release upload v2.0.0 stc-toolkit-0.2.0.vsix --clobber --repo "${{ github.repository }}"
           else
             gh release create v2.0.0 stc-toolkit-0.2.0.vsix --repo "${{ github.repository }}" --target v2 --title "v2" --notes "STC Toolkit v2 (0.2.0): multi-backend architecture, backward-compatible stcgal support, experimental native USB-HID backend, official-tool fallback for STC32G144K246 and other new or large-flash devices, automatic backend selection, and English-first bilingual documentation."
+          fi
+
+      - name: Publish v3
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view v3.0.0 --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            gh release upload v3.0.0 stc-toolkit-0.3.0.vsix --clobber --repo "${{ github.repository }}"
+          else
+            gh release create v3.0.0 stc-toolkit-0.3.0.vsix --repo "${{ github.repository }}" --target v3 --title "v3" --notes "STC Toolkit v3 (0.3.0): K5-style editor toolbar with one-click Build, Flash and Build & Flash buttons, quieter workflow options, and improved configuration-first UX. STC32G144K246 still uses the official backend for the final programming step until extended native USB-HID support is complete."
           fi

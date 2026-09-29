@@ -41,6 +41,12 @@ jobs:
           ref: v3.1
           path: v3.1
 
+      - name: Checkout v3.2
+        uses: actions/checkout@v4
+        with:
+          ref: v3.2
+          path: v3.2
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -64,6 +70,10 @@ jobs:
       - name: Package v3.1
         working-directory: v3.1
         run: vsce package --out ../stc-toolkit-0.3.1.vsix
+
+      - name: Package v3.2
+        working-directory: v3.2
+        run: vsce package --out ../stc-toolkit-0.3.2.vsix
 
       - name: Publish v1
         env:
@@ -103,4 +113,14 @@ jobs:
             gh release upload v3.1.0 stc-toolkit-0.3.1.vsix --clobber --repo "${{ github.repository }}"
           else
             gh release create v3.1.0 stc-toolkit-0.3.1.vsix --repo "${{ github.repository }}" --target v3.1 --title "v3.1" --notes "STC Toolkit v3.1 (0.3.1): one-click K5-style editor workflow plus automatic Keil HEX/IHX detection. The extension reads Keil OutputDirectory/OutputName, prefers firmware produced by the current build, falls back to common output folders, and shows the detected firmware in the VS Code status bar."
+          fi
+
+      - name: Publish v3.2
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view v3.2.0 --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            gh release upload v3.2.0 stc-toolkit-0.3.2.vsix --clobber --repo "${{ github.repository }}"
+          else
+            gh release create v3.2.0 stc-toolkit-0.3.2.vsix --repo "${{ github.repository }}" --target v3.2 --title "v3.2" --notes "STC Toolkit v3.2 (0.3.2): localized VS Code settings and commands. English remains the default UI language, with Simplified Chinese and Traditional Chinese package localization for configuration descriptions, command names and flash-backend help."
           fi

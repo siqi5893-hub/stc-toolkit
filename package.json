@@ -5,8 +5,13 @@
   "version": "0.2.0",
   "publisher": "local",
   "license": "MIT",
-  "engines": { "vscode": "^1.85.0" },
-  "categories": ["Other", "Programming Languages"],
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Programming Languages"
+  ],
   "activationEvents": [
     "workspaceContains:**/*.uvproj",
     "workspaceContains:**/*.uvprojx",
@@ -22,15 +27,46 @@
   "main": "./extension.js",
   "contributes": {
     "commands": [
-      { "command": "stcToolkit.build", "title": "STC: Build Project", "icon": "$(tools)" },
-      { "command": "stcToolkit.rebuild", "title": "STC: Rebuild Project", "icon": "$(sync)" },
-      { "command": "stcToolkit.flash", "title": "STC: Flash Firmware", "icon": "$(zap)" },
-      { "command": "stcToolkit.buildFlash", "title": "STC: Build & Flash", "icon": "$(rocket)" },
-      { "command": "stcToolkit.selectBackend", "title": "STC: Select Flash Backend" },
-      { "command": "stcToolkit.selectPort", "title": "STC: Select Serial Port" },
-      { "command": "stcToolkit.selectFirmware", "title": "STC: Select Firmware File" },
-      { "command": "stcToolkit.openOfficialIsp", "title": "STC: Open Official STC-ISP / AiCube" },
-      { "command": "stcToolkit.showInfo", "title": "STC: Show Project / Device Info" }
+      {
+        "command": "stcToolkit.build",
+        "title": "STC: Build Project",
+        "icon": "$(tools)"
+      },
+      {
+        "command": "stcToolkit.rebuild",
+        "title": "STC: Rebuild Project",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "stcToolkit.flash",
+        "title": "STC: Flash Firmware",
+        "icon": "$(zap)"
+      },
+      {
+        "command": "stcToolkit.buildFlash",
+        "title": "STC: Build & Flash",
+        "icon": "$(rocket)"
+      },
+      {
+        "command": "stcToolkit.selectBackend",
+        "title": "STC: Select Flash Backend"
+      },
+      {
+        "command": "stcToolkit.selectPort",
+        "title": "STC: Select Serial Port"
+      },
+      {
+        "command": "stcToolkit.selectFirmware",
+        "title": "STC: Select Firmware File"
+      },
+      {
+        "command": "stcToolkit.openOfficialIsp",
+        "title": "STC: Open Official STC-ISP / AiCube"
+      },
+      {
+        "command": "stcToolkit.showInfo",
+        "title": "STC: Show Project / Device Info"
+      }
     ],
     "configuration": {
       "title": "STC Toolkit",
@@ -57,7 +93,13 @@
         },
         "stcToolkit.flash.backend": {
           "type": "string",
-          "enum": ["auto", "stcgal", "native-hid", "official", "custom"],
+          "enum": [
+            "auto",
+            "stcgal",
+            "native-hid",
+            "official",
+            "custom"
+          ],
           "default": "auto",
           "description": "Auto selects stcgal for legacy families and official/native paths for newer devices."
         },
@@ -68,7 +110,19 @@
         },
         "stcToolkit.flash.protocol": {
           "type": "string",
-          "enum": ["auto", "stc89", "stc12a", "stc12b", "stc12", "stc15a", "stc15", "stc8", "stc8d", "stc8g", "usb15"],
+          "enum": [
+            "auto",
+            "stc89",
+            "stc12a",
+            "stc12b",
+            "stc12",
+            "stc15a",
+            "stc15",
+            "stc8",
+            "stc8d",
+            "stc8g",
+            "usb15"
+          ],
           "default": "auto",
           "description": "stcgal protocol override."
         },
@@ -124,5 +178,13 @@
   },
   "scripts": {
     "test": "node --check extension.js && node --check lib/device-db.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/siqi5893-hub/stc-toolkit.git"
+  },
+  "homepage": "https://github.com/siqi5893-hub/stc-toolkit#readme",
+  "bugs": {
+    "url": "https://github.com/siqi5893-hub/stc-toolkit/issues"
   }
 }

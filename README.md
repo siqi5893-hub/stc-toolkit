@@ -21,6 +21,47 @@ The project follows one rule:
 - Official STC-ISP / AiCube fallback for newer and large-flash devices
 - Custom backend support for your own CLI / Python / Rust / C/C++ flasher
 
+## One-click Workflow
+
+After the initial configuration, normal development does not require opening the command palette.
+
+When a C/C++ source file is open, STC Toolkit shows three buttons in the editor title bar:
+
+- **Build**
+- **Flash**
+- **Build & Flash**
+
+The **Build & Flash** button performs the complete configured workflow with one click:
+
+```text
+Edit source
+  -> Build Keil project
+  -> Locate latest firmware
+  -> Detect target MCU
+  -> Select flash backend
+  -> Flash / launch configured programmer
+```
+
+You can also click the **STC** button in the VS Code status bar; it runs the same **Build & Flash** command.
+
+The toolbar can be disabled with:
+
+```json
+{
+  "stcToolkit.ui.showEditorButtons": false
+}
+```
+
+For a quieter workflow, success notifications can also be disabled:
+
+```json
+{
+  "stcToolkit.ui.showSuccessNotifications": false
+}
+```
+
+> For legacy STC devices using `stcgal`, Build & Flash can be fully automatic. For **STC32G144K246**, the current official backend still launches STC-ISP/AiCube for the final programming step until the extended native USB-HID protocol is fully implemented.
+
 ## Supported Families
 
 | Family | Default backend | Status |

@@ -8,6 +8,16 @@ STC Toolkit 是一个面向 **STC 单片机开发** 的 VS Code 扩展，目标�
 
 > **老型号保持向下兼容，新型号不强行套用旧协议。**
 
+## 中文设置界面
+
+STC Toolkit 会跟随 VS Code 的显示语言自动本地化：
+
+- VS Code 使用简体中文 → 插件命令和设置说明显示中文
+- VS Code 使用繁体中文 → 显示繁体中文
+- VS Code 使用英文 → 显示英文
+
+这不仅是 README 中文化，**扩展设置页面本身也有中文说明**，包括 Keil 路径、HEX 自动检测、烧录后端、串口、Native HID、官方 STC-ISP 路径等选项。
+
 ## 功能
 
 - 自动识别 Keil `.uvproj` / `.uvprojx` 工程

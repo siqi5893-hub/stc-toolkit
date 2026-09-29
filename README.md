@@ -130,6 +130,27 @@ You can also use your own build command:
 
 ## Firmware Discovery
 
+### Automatic HEX detection
+
+You normally do **not** need to configure a firmware path.
+
+STC Toolkit detects firmware in this order:
+
+1. Use `stcToolkit.firmwareFile` only when you explicitly set an override.
+2. Read Keil `OutputDirectory` and `OutputName` from the active `.uvproj/.uvprojx`.
+3. Prefer the exact generated `.hex/.ihx/.ihex` file from that Keil target.
+4. Fall back to common output folders such as `out_file`, `Objects`, `Output`, `build`, and `bin`.
+5. After a build, prefer firmware updated by the current build, reducing the chance of flashing a stale HEX from another target.
+
+The detected firmware name is also shown next to the **STC** status-bar button.
+
+You can manually verify detection with:
+
+```text
+STC: Detect Firmware Automatically
+```
+
+
 After a successful build, STC Toolkit automatically selects the newest firmware file in the workspace:
 
 ```text

@@ -3,7 +3,7 @@
   "displayName": "STC Toolkit",
   "description": "Build and flash common STC MCU projects from VS Code (Keil + stcgal/custom backends).",
   "version": "0.1.0",
-  "publisher": "local",
+  "publisher": "SiboXu",
   "license": "MIT",
   "engines": {
     "vscode": "^1.85.0"

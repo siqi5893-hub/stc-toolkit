@@ -21,6 +21,47 @@ STC Toolkit 是一个面向 **STC 单片机开发** 的 VS Code 扩展，目标�
 - 新型号 / 大容量芯片自动回退官方 STC-ISP / AiCube
 - 支持自定义 CLI、Python、Rust、C/C++ 烧录器
 
+## 一键编译与烧录
+
+完成一次性配置后，日常开发不需要再打开命令面板。
+
+打开 C/C++ 源文件时，编辑器右上角会显示三个按钮：
+
+- **Build**
+- **Flash**
+- **Build & Flash**
+
+点击 **Build & Flash** 后，插件会按配置自动执行：
+
+```text
+修改源码
+  -> 编译 Keil 工程
+  -> 自动寻找最新固件
+  -> 识别目标 MCU
+  -> 自动选择烧录后端
+  -> 烧录 / 启动已配置的烧录器
+```
+
+VS Code 左下角状态栏中的 **STC** 按钮执行的也是同一个 **Build & Flash** 流程。
+
+如不需要编辑器右上角按钮，可以关闭：
+
+```json
+{
+  "stcToolkit.ui.showEditorButtons": false
+}
+```
+
+如果希望整个流程更安静，也可以关闭成功提示：
+
+```json
+{
+  "stcToolkit.ui.showSuccessNotifications": false
+}
+```
+
+> 对使用 `stcgal` 的传统 STC 型号，可以真正做到一键“编译 + 烧录”。对于 **STC32G144K246**，当前 official 后端仍需要由 STC-ISP/AiCube 完成最终写入；等大容量 Native USB-HID 协议完成后即可完全在 VS Code 内一键完成。
+
 ## 当前支持
 
 | 系列 | 默认后端 | 状态 |

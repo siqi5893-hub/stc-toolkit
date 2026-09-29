@@ -14,6 +14,7 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout v1
         uses: actions/checkout@v4
@@ -43,45 +44,22 @@ jobs:
         working-directory: v2
         run: vsce package --out ../stc-toolkit-0.2.0.vsix
 
-      - name: Publish v1 release
+      - name: Publish v1
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view v1.0.0 >/dev/null 2>&1; then
-            gh release upload v1.0.0 stc-toolkit-0.1.0.vsix --clobber
+          if gh release view v1.0.0 --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            gh release upload v1.0.0 stc-toolkit-0.1.0.vsix --clobber --repo "${{ github.repository }}"
           else
-            gh release create v1.0.0 stc-toolkit-0.1.0.vsix \
-              --repo "${{ github.repository }}" \
-              --target v1 \
-              --title "v1" \
-              --notes "STC Toolkit v1 (0.1.0)
-
-Initial public release:
-- Keil project detection
-- Build / Rebuild
-- stcgal-based flashing for common legacy STC families
-- Custom flash backend
-- Official STC-ISP launcher fallback"
+            gh release create v1.0.0 stc-toolkit-0.1.0.vsix --repo "${{ github.repository }}" --target v1 --title "v1" --notes "STC Toolkit v1 (0.1.0): initial public release with Keil project detection, Build/Rebuild, stcgal support for common legacy STC families, a custom flash backend, and an official STC-ISP launcher fallback."
           fi
 
-      - name: Publish v2 release
+      - name: Publish v2
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view v2.0.0 >/dev/null 2>&1; then
-            gh release upload v2.0.0 stc-toolkit-0.2.0.vsix --clobber
+          if gh release view v2.0.0 --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            gh release upload v2.0.0 stc-toolkit-0.2.0.vsix --clobber --repo "${{ github.repository }}"
           else
-            gh release create v2.0.0 stc-toolkit-0.2.0.vsix \
-              --repo "${{ github.repository }}" \
-              --target v2 \
-              --title "v2" \
-              --notes "STC Toolkit v2 (0.2.0)
-
-Second public release:
-- Multi-backend architecture
-- Backward-compatible stcgal support for legacy STC devices
-- Experimental native USB-HID backend
-- Official-tool fallback for STC32G144K246 and other new/large-flash devices
-- Automatic backend selection
-- English-first bilingual documentation"
+            gh release create v2.0.0 stc-toolkit-0.2.0.vsix --repo "${{ github.repository }}" --target v2 --title "v2" --notes "STC Toolkit v2 (0.2.0): multi-backend architecture, backward-compatible stcgal support, experimental native USB-HID backend, official-tool fallback for STC32G144K246 and other new or large-flash devices, automatic backend selection, and English-first bilingual documentation."
           fi

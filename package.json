@@ -1,8 +1,8 @@
 {
   "name": "stc-toolkit",
   "displayName": "STC Toolkit",
-  "description": "Unified VS Code build/flash workflow for common STC MCUs: legacy stcgal + new-generation STC-ISP/AiCube + experimental native USB HID.",
-  "version": "0.2.0",
+  "description": "Build and flash common STC MCU projects from VS Code (Keil + stcgal/custom backends).",
+  "version": "0.1.0",
   "publisher": "local",
   "license": "MIT",
   "engines": { "vscode": "^1.85.0" },
@@ -16,7 +16,6 @@
     "onCommand:stcToolkit.buildFlash",
     "onCommand:stcToolkit.selectPort",
     "onCommand:stcToolkit.selectFirmware",
-    "onCommand:stcToolkit.selectBackend",
     "onCommand:stcToolkit.openOfficialIsp"
   ],
   "main": "./extension.js",
@@ -26,12 +25,23 @@
       { "command": "stcToolkit.rebuild", "title": "STC: Rebuild Project", "icon": "$(sync)" },
       { "command": "stcToolkit.flash", "title": "STC: Flash Firmware", "icon": "$(zap)" },
       { "command": "stcToolkit.buildFlash", "title": "STC: Build & Flash", "icon": "$(rocket)" },
-      { "command": "stcToolkit.selectBackend", "title": "STC: Select Flash Backend" },
       { "command": "stcToolkit.selectPort", "title": "STC: Select Serial Port" },
       { "command": "stcToolkit.selectFirmware", "title": "STC: Select Firmware File" },
-      { "command": "stcToolkit.openOfficialIsp", "title": "STC: Open Official STC-ISP / AiCube" },
+      { "command": "stcToolkit.openOfficialIsp", "title": "STC: Open Official STC-ISP" },
       { "command": "stcToolkit.showInfo", "title": "STC: Show Project / Device Info" }
     ],
+    "menus": {
+      "commandPalette": [
+        { "command": "stcToolkit.build" },
+        { "command": "stcToolkit.rebuild" },
+        { "command": "stcToolkit.flash" },
+        { "command": "stcToolkit.buildFlash" },
+        { "command": "stcToolkit.selectPort" },
+        { "command": "stcToolkit.selectFirmware" },
+        { "command": "stcToolkit.openOfficialIsp" },
+        { "command": "stcToolkit.showInfo" }
+      ]
+    },
     "configuration": {
       "title": "STC Toolkit",
       "properties": {
@@ -43,86 +53,66 @@
         "stcToolkit.keil.uv4Path": {
           "type": "string",
           "default": "",
-          "description": "Path to UV4.exe for Keil C51/C251 builds."
+          "description": "Path to UV4.exe. Used to build C51/C251 Keil projects."
         },
         "stcToolkit.build.customCommand": {
           "type": "string",
           "default": "",
-          "description": "Optional custom build command. Supports ${workspaceFolder} and ${projectFile}."
+          "description": "Optional custom build command. If set, it is used instead of UV4.exe. Supports ${workspaceFolder} and ${projectFile}."
         },
         "stcToolkit.firmwareFile": {
           "type": "string",
           "default": "",
-          "description": "HEX/IHX firmware path. Empty = newest firmware in workspace."
+          "description": "HEX/IHX firmware path. Leave empty to auto-select the newest firmware file after build."
         },
         "stcToolkit.flash.backend": {
           "type": "string",
-          "enum": ["auto", "stcgal", "native-hid", "official", "custom"],
-          "default": "auto",
-          "description": "Auto selects stcgal for legacy families and official/native paths for newer devices."
+          "enum": ["stcgal", "custom", "official"],
+          "default": "stcgal",
+          "description": "Flashing backend. stcgal provides direct flashing for many common STC parts; custom runs a user command; official launches STC-ISP."
         },
         "stcToolkit.flash.stcgalPath": {
           "type": "string",
           "default": "stcgal",
-          "description": "stcgal executable/command."
+          "description": "stcgal executable or command name (for example stcgal or python -m stcgal)."
         },
         "stcToolkit.flash.protocol": {
           "type": "string",
           "enum": ["auto", "stc89", "stc12a", "stc12b", "stc12", "stc15a", "stc15", "stc8", "stc8d", "stc8g", "usb15"],
           "default": "auto",
-          "description": "stcgal protocol override."
+          "description": "stcgal protocol. Auto works for many UART targets; STC32 commonly maps to stc8d in stcgal."
         },
         "stcToolkit.flash.port": {
           "type": "string",
           "default": "",
-          "description": "Serial port such as COM3 for UART ISP backends."
+          "description": "Serial port such as COM3. Leave empty and use STC: Select Serial Port. Ignored by USB-only protocols."
         },
         "stcToolkit.flash.baud": {
           "type": "number",
           "default": 115200,
           "minimum": 1200,
           "maximum": 3000000,
-          "description": "Programming baud rate for stcgal."
+          "description": "Programming baud rate for stcgal UART mode."
         },
         "stcToolkit.flash.autoreset": {
           "type": "boolean",
           "default": false,
-          "description": "Pass -a to stcgal for DTR/RTS auto reset."
-        },
-        "stcToolkit.flash.pythonPath": {
-          "type": "string",
-          "default": "",
-          "description": "Python command/path used by the experimental native HID backend. Empty = auto-detect."
-        },
-        "stcToolkit.flash.nativeHidExperimental": {
-          "type": "boolean",
-          "default": false,
-          "description": "Enable the experimental direct USB HID ISP backend. It intentionally refuses addresses above 0xFFFF."
-        },
-        "stcToolkit.flash.nativeHidAutoReset": {
-          "type": "boolean",
-          "default": false,
-          "description": "Before native HID flashing, try to send the user reset-to-ISP command on VID 34BF / PID FF01."
-        },
-        "stcToolkit.flash.nativeHidResetCommand": {
-          "type": "string",
-          "default": "@STCISP#",
-          "description": "User command used to request reset into ISP mode."
+          "description": "Pass -a to stcgal for DTR/RTS based automatic power cycling when the hardware supports it."
         },
         "stcToolkit.flash.customCommand": {
           "type": "string",
           "default": "",
-          "description": "Custom flash command. Supports ${firmware}, ${port}, ${protocol}, ${workspaceFolder}, ${projectFile}, ${device}."
+          "description": "Custom flash command. Supports ${firmware}, ${port}, ${protocol}, ${workspaceFolder}, ${projectFile}."
         },
         "stcToolkit.officialIspPath": {
           "type": "string",
           "default": "",
-          "description": "Path to official STC-ISP/AiCube executable. Recommended for newest/large-flash STC parts."
+          "description": "Path to the official STC-ISP/AiCube executable for fallback/manual flashing."
         }
       }
     }
   },
   "scripts": {
-    "test": "node --check extension.js && node --check lib/device-db.js"
+    "test": "node --check extension.js"
   }
 }

@@ -57,6 +57,8 @@ and then selects the MCU family and preferred flashing backend.
 
 ## Build
 
+> **Note:** Paths shown in this README are examples only. Replace them with the actual installation paths on your system.
+
 Default Keil build:
 
 ```text
@@ -73,7 +75,7 @@ Example configuration:
 
 ```json
 {
-  "stcToolkit.keil.uv4Path": "C:\\Keil_v5\\UV4\\UV4.exe"
+  "stcToolkit.keil.uv4Path": "C:\\Path\\To\\Keil_v5\\UV4\\UV4.exe"
 }
 ```
 
@@ -172,7 +174,7 @@ Recommended for newer or large-flash devices such as **STC32G144K246**:
 ```json
 {
   "stcToolkit.flash.backend": "official",
-  "stcToolkit.officialIspPath": "E:\\Chrome\\stc-isp6.96s\\STC-ISP-v6.96S.exe"
+  "stcToolkit.officialIspPath": "C:\\Path\\To\\STC-ISP\\STC-ISP-v6.96S.exe"
 }
 ```
 
@@ -221,7 +223,7 @@ The **STC** status-bar button runs **Build & Flash**.
 ```json
 {
   "stcToolkit.flash.backend": "auto",
-  "stcToolkit.officialIspPath": "E:\\Chrome\\stc-isp6.96s\\STC-ISP-v6.96S.exe"
+  "stcToolkit.officialIspPath": "C:\\Path\\To\\STC-ISP\\STC-ISP-v6.96S.exe"
 }
 ```
 

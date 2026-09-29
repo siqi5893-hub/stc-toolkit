@@ -250,8 +250,10 @@ VS Code
 - 完善芯片数据库与协议能力检测
 - 增加 VS Code 侧边栏设备 / 固件 / 后端 / 烧录状态 UI
 
-## License
+## 许可证
 
-插件代码使用 MIT License。
+STC Toolkit 使用 [MIT License](./LICENSE) 开源。
 
-`stcgal`、Keil、STC-ISP、AiCube 等外部工具保留各自许可证，除非特别说明，否则不会随插件捆绑发布。
+第三方软件、商标归属、项目独立性以及硬件烧录风险说明，请参阅 [NOTICE.md](./NOTICE.md)。
+
+外部工具和专有二进制文件不会因为与 STC Toolkit 配合使用而被重新授权，其许可证和使用条款仍以各自上游项目或厂商为准。

@@ -4,21 +4,19 @@ const vscode = require('vscode');
 const cp = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const { classifyDevice, suggestedProtocol } = require('./lib/device-db');
 
 let output;
 let status;
-let extensionPath = '';
 
 function cfg() { return vscode.workspace.getConfiguration('stcToolkit'); }
 function root() {
   const f = vscode.workspace.workspaceFolders?.[0];
-  if (!f) throw new Error('请先打开一个工程文件夹 / Open a project folder first.');
+  if (!f) throw new Error('请先打开一个工程文件夹。');
   return f.uri.fsPath;
 }
 function expand(s, vars) {
   if (!s) return s;
-  return s.replace(/\$\{(workspaceFolder|projectFile|firmware|port|protocol|device)\}/g, (_, k) => vars[k] ?? '');
+  return s.replace(/\$\{(workspaceFolder|projectFile|firmware|port|protocol)\}/g, (_, k) => vars[k] ?? '');
 }
 function quote(s) { return `"${String(s).replace(/"/g, '\\"')}"`; }
 
@@ -34,13 +32,10 @@ async function findProject() {
     if (fs.existsSync(p)) return p;
   }
   const files = [...await filesByGlob('**/*.uvproj'), ...await filesByGlob('**/*.uvprojx')];
-  if (!files.length) throw new Error('没有找到 .uvproj/.uvprojx / No Keil project was found.');
+  if (!files.length) throw new Error('没有找到 .uvproj/.uvprojx。可在设置中指定 stcToolkit.projectFile。');
   if (files.length === 1) return files[0];
-  const pick = await vscode.window.showQuickPick(
-    files.map(f => ({ label: path.basename(f), description: path.relative(root(), f), file: f })),
-    { placeHolder: '选择 Keil 工程 / Select a Keil project' }
-  );
-  if (!pick) throw new Error('已取消 / Cancelled.');
+  const pick = await vscode.window.showQuickPick(files.map(f => ({ label: path.basename(f), description: path.relative(root(), f), file: f })), { placeHolder: '选择 Keil 工程' });
+  if (!pick) throw new Error('已取消。');
   return pick.file;
 }
 
@@ -49,10 +44,30 @@ function parseProjectDevice(projectFile) {
     const text = fs.readFileSync(projectFile, 'utf8');
     const device = /<Device>([^<]+)<\/Device>/i.exec(text)?.[1]?.trim() || '';
     const target = /<TargetName>([^<]+)<\/TargetName>/i.exec(text)?.[1]?.trim() || '';
-    return { device, target, ...classifyDevice(device || target) };
-  } catch {
-    return { device: '', target: '', ...classifyDevice('') };
-  }
+    return { device, target, family: classifyFamily(device || target) };
+  } catch { return { device: '', target: '', family: 'unknown' }; }
+}
+
+function classifyFamily(name) {
+  const n = String(name).toUpperCase();
+  if (/STC32/.test(n)) return 'STC32';
+  if (/STC8G|STC8H/.test(n)) return 'STC8G/H';
+  if (/STC8/.test(n)) return 'STC8';
+  if (/STC15/.test(n)) return 'STC15';
+  if (/STC1[012]/.test(n)) return 'STC10/11/12';
+  if (/STC8[9-9]|STC89|STC90/.test(n)) return 'STC89/90';
+  return 'unknown';
+}
+
+function suggestedProtocol(family) {
+  return ({
+    'STC32': 'stc8d',
+    'STC8G/H': 'stc8g',
+    'STC8': 'stc8d',
+    'STC15': 'stc15',
+    'STC10/11/12': 'stc12',
+    'STC89/90': 'stc89'
+  })[family] || 'auto';
 }
 
 async function newestFirmware() {
@@ -66,7 +81,7 @@ async function newestFirmware() {
     ...await filesByGlob('**/*.ihx'),
     ...await filesByGlob('**/*.ihex')
   ].filter(p => fs.existsSync(p));
-  if (!files.length) throw new Error('没有找到 HEX/IHX 固件 / No HEX/IHX firmware found. Build first or select a firmware file.');
+  if (!files.length) throw new Error('没有找到 HEX/IHX 固件。请先编译或执行 “STC: Select Firmware File”。');
   files.sort((a,b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs);
   return files[0];
 }
@@ -80,7 +95,7 @@ function runShell(command, cwd, title) {
     child.stdout.on('data', d => output.append(d.toString()));
     child.stderr.on('data', d => output.append(d.toString()));
     child.on('error', reject);
-    child.on('close', code => code === 0 ? resolve(code) : reject(new Error(`${title} failed, exit code ${code}`)));
+    child.on('close', code => code === 0 ? resolve(code) : reject(new Error(`${title} 失败，退出码 ${code}`)));
   });
 }
 
@@ -94,13 +109,13 @@ async function build(rebuild=false) {
       await runShell(expand(custom, vars), root(), rebuild ? 'STC Rebuild' : 'STC Build');
     } else {
       const uv4 = cfg().get('keil.uv4Path', '').trim();
-      if (!uv4) throw new Error('尚未配置 UV4.exe / Configure stcToolkit.keil.uv4Path or a custom build command.');
+      if (!uv4) throw new Error('尚未配置 UV4.exe。请设置 stcToolkit.keil.uv4Path，或配置自定义 Build 命令。');
       const flag = rebuild ? '-r' : '-b';
       await runShell(`${quote(uv4)} ${flag} ${quote(projectFile)}`, path.dirname(projectFile), rebuild ? 'Keil Rebuild' : 'Keil Build');
     }
     const fw = await newestFirmware().catch(() => null);
     status.text = fw ? `$(check) ${path.basename(fw)}` : '$(check) STC Build';
-    vscode.window.showInformationMessage(fw ? `编译完成 / Build complete: ${path.basename(fw)}` : '编译完成 / Build complete.');
+    vscode.window.showInformationMessage(fw ? `编译完成：${path.basename(fw)}` : '编译完成。');
     return true;
   } finally {
     if (status.text.includes('spin')) status.text = '$(chip) STC';
@@ -121,148 +136,83 @@ async function listPorts() {
       });
     });
   }
-  return [];
+  const candidates = ['/dev/ttyUSB*','/dev/ttyACM*','/dev/cu.*'];
+  return candidates.map(p => ({port:p,name:p}));
 }
 
 async function selectPort() {
   const ports = await listPorts();
   let value;
   if (ports.length) {
-    const pick = await vscode.window.showQuickPick(
-      ports.map(p => ({ label:p.port, description:p.name })),
-      { placeHolder:'选择 STC 下载串口 / Select STC serial port' }
-    );
+    const pick = await vscode.window.showQuickPick(ports.map(p => ({ label:p.port, description:p.name })), { placeHolder:'选择 STC 下载串口' });
     if (!pick) return;
     value = pick.label;
   } else {
-    value = await vscode.window.showInputBox({ prompt:'没有自动发现串口，请输入端口（例如 COM3） / Enter a serial port, e.g. COM3' });
+    value = await vscode.window.showInputBox({ prompt:'没有自动发现串口，请输入端口（例如 COM3）' });
     if (!value) return;
   }
   await cfg().update('flash.port', value, vscode.ConfigurationTarget.Workspace);
-  vscode.window.showInformationMessage(`STC port: ${value}`);
+  vscode.window.showInformationMessage(`STC 下载端口：${value}`);
 }
 
 async function selectFirmware() {
   const picked = await vscode.window.showOpenDialog({ canSelectMany:false, filters:{'Firmware':['hex','ihx','ihex','bin']} });
   if (!picked?.[0]) return;
   await cfg().update('firmwareFile', picked[0].fsPath, vscode.ConfigurationTarget.Workspace);
-  vscode.window.showInformationMessage(`Firmware: ${picked[0].fsPath}`);
-}
-
-function resolveBackend(info) {
-  const configured = cfg().get('flash.backend', 'auto');
-  if (configured !== 'auto') return configured;
-  return info.preferred || 'stcgal';
-}
-
-async function flashWithStcgal(info, firmware) {
-  const exe = cfg().get('flash.stcgalPath', 'stcgal').trim() || 'stcgal';
-  let protocol = cfg().get('flash.protocol', 'auto');
-  if (protocol === 'auto') protocol = suggestedProtocol(info);
-  const port = cfg().get('flash.port', '').trim();
-  const baud = cfg().get('flash.baud', 115200);
-  const autoreset = cfg().get('flash.autoreset', false);
-  const args = [];
-  if (protocol) args.push('-P', protocol);
-  if (protocol !== 'usb15') {
-    if (!port) throw new Error('尚未选择串口 / No serial port selected. Run “STC: Select Serial Port”.');
-    args.push('-p', port, '-b', String(baud));
-  }
-  if (autoreset) args.push('-a');
-  args.push(firmware);
-  output.appendLine(`Backend: stcgal | Family: ${info.family} | Protocol: ${protocol}`);
-  await runShell([exe, ...args.map(quote)].join(' '), root(), 'STC Flash (stcgal)');
-}
-
-async function findPython() {
-  const configured = cfg().get('flash.pythonPath', '').trim();
-  if (configured) return configured;
-  const candidates = process.platform === 'win32' ? ['py -3', 'python', 'python3'] : ['python3', 'python'];
-  for (const c of candidates) {
-    const ok = await new Promise(resolve => cp.exec(`${c} --version`, { windowsHide:true }, err => resolve(!err)));
-    if (ok) return c;
-  }
-  throw new Error('未找到 Python / Python was not found. Configure stcToolkit.flash.pythonPath.');
-}
-
-async function flashWithNativeHid(info, firmware) {
-  const experimental = cfg().get('flash.nativeHidExperimental', false);
-  if (!experimental) {
-    throw new Error('Native HID 仍为实验功能。请在设置中启用 stcToolkit.flash.nativeHidExperimental，或使用 official 后端。 / Native HID is experimental; enable it explicitly or use the official backend.');
-  }
-  const python = await findPython();
-  const helper = path.join(extensionPath, 'scripts', 'stc_hid_flash.py');
-  const autoReset = cfg().get('flash.nativeHidAutoReset', false);
-  const resetCommand = cfg().get('flash.nativeHidResetCommand', '@STCISP#');
-  let cmd = `${python} ${quote(helper)} ${quote(firmware)}`;
-  if (autoReset) cmd += ` --auto-reset --reset-command ${quote(resetCommand)}`;
-  output.appendLine(`Backend: native-hid (experimental) | Family: ${info.family}`);
-  if (info.family === 'STC32G144K246' || info.family === 'NEXT_GEN') {
-    output.appendLine('NOTE: large-flash/new-generation parts are intentionally blocked by the native helper until extended addressing is verified.');
-  }
-  await runShell(cmd, root(), 'STC Flash (native HID)');
-}
-
-async function openOfficialIsp() {
-  const exe = cfg().get('officialIspPath', '').trim();
-  if (!exe || !fs.existsSync(exe)) throw new Error('请设置 stcToolkit.officialIspPath / Configure the official STC-ISP/AiCube path.');
-  cp.spawn(exe, [], { detached:true, stdio:'ignore', windowsHide:false }).unref();
-}
-
-async function flashWithOfficial(info, firmware) {
-  output.appendLine(`Backend: official STC-ISP/AiCube | Family: ${info.family}`);
-  output.appendLine(`Firmware: ${firmware}`);
-  await openOfficialIsp();
-  vscode.window.showInformationMessage('已打开官方 STC-ISP/AiCube。新版/大容量芯片目前交由官方 ISP 处理；插件保留自动后端选择和后续原生 HID 扩展接口。 / Official STC-ISP/AiCube opened for new or large-flash devices.');
+  vscode.window.showInformationMessage(`固件：${picked[0].fsPath}`);
 }
 
 async function flash() {
   const projectFile = await findProject().catch(() => '');
   const firmware = await newestFirmware();
-  const info = projectFile ? parseProjectDevice(projectFile) : { device:'', target:'', ...classifyDevice('') };
-  const backend = resolveBackend(info);
+  const info = projectFile ? parseProjectDevice(projectFile) : { family:'unknown', device:'', target:'' };
+  const backend = cfg().get('flash.backend', 'stcgal');
+  let protocol = cfg().get('flash.protocol', 'auto');
+  if (protocol === 'auto' && info.family !== 'unknown') protocol = suggestedProtocol(info.family);
   const port = cfg().get('flash.port', '').trim();
-  const protocol = cfg().get('flash.protocol', 'auto');
-  const vars = { workspaceFolder: root(), projectFile, firmware, port, protocol, device: info.device || info.target || '' };
+  const vars = { workspaceFolder: root(), projectFile, firmware, port, protocol };
 
   status.text = '$(sync~spin) STC Flash';
   try {
     if (backend === 'stcgal') {
-      await flashWithStcgal(info, firmware);
-    } else if (backend === 'native-hid') {
-      await flashWithNativeHid(info, firmware);
+      const exe = cfg().get('flash.stcgalPath', 'stcgal').trim() || 'stcgal';
+      const baud = cfg().get('flash.baud', 115200);
+      const autoreset = cfg().get('flash.autoreset', false);
+      const args = [];
+      if (protocol) args.push('-P', protocol);
+      if (protocol !== 'usb15') {
+        if (!port) throw new Error('尚未选择串口。运行 “STC: Select Serial Port”。');
+        args.push('-p', port, '-b', String(baud));
+      }
+      if (autoreset) args.push('-a');
+      args.push(firmware);
+      const cmd = [exe, ...args.map(quote)].join(' ');
+      output.appendLine(`设备族：${info.family}${info.device ? ` / ${info.device}` : ''}`);
+      output.appendLine(`协议：${protocol}`);
+      if (info.family === 'STC32') {
+        output.appendLine('提示：stcgal 文档将 STC32 映射到 stc8d，但具体新型号是否已收录取决于 stcgal 版本。');
+      }
+      await runShell(cmd, root(), 'STC Flash (stcgal)');
     } else if (backend === 'custom') {
       const tpl = cfg().get('flash.customCommand', '').trim();
-      if (!tpl) throw new Error('请配置 stcToolkit.flash.customCommand / Configure custom flash command.');
+      if (!tpl) throw new Error('请配置 stcToolkit.flash.customCommand。');
       await runShell(expand(tpl, vars), root(), 'STC Flash (custom)');
-    } else if (backend === 'official') {
-      await flashWithOfficial(info, firmware);
-      return;
     } else {
-      throw new Error(`Unknown backend: ${backend}`);
+      await openOfficialIsp();
+      vscode.window.showWarningMessage('已启动官方 STC-ISP。当前官方后端仅负责启动软件，不模拟未公开的 STC-ISP GUI 操作。');
+      return;
     }
     status.text = `$(check) ${path.basename(firmware)}`;
-    vscode.window.showInformationMessage(`烧录完成 / Flash complete: ${path.basename(firmware)}`);
+    vscode.window.showInformationMessage(`烧录完成：${path.basename(firmware)}`);
   } finally {
     if (status.text.includes('spin')) status.text = '$(chip) STC';
   }
 }
 
-async function chooseBackend() {
-  const projectFile = await findProject().catch(() => '');
-  const info = projectFile ? parseProjectDevice(projectFile) : { ...classifyDevice('') };
-  const recommended = info.preferred || 'stcgal';
-  const items = [
-    { label:'Auto', description:`Recommended for detected device: ${recommended}`, value:'auto' },
-    { label:'stcgal', description:'Legacy/common UART STC families', value:'stcgal' },
-    { label:'Native USB HID (Experimental)', description:'Direct USB writer backend; currently limited to <=64 KiB address space', value:'native-hid' },
-    { label:'Official STC-ISP / AiCube', description:'Recommended for STC32G144K246, STC33, AI8051U and other newest devices', value:'official' },
-    { label:'Custom command', description:'Your own CLI / script backend', value:'custom' }
-  ];
-  const pick = await vscode.window.showQuickPick(items, { placeHolder:`Detected: ${info.device || info.target || 'unknown'} / ${info.family}` });
-  if (!pick) return;
-  await cfg().update('flash.backend', pick.value, vscode.ConfigurationTarget.Workspace);
-  vscode.window.showInformationMessage(`STC backend: ${pick.value}`);
+async function openOfficialIsp() {
+  const exe = cfg().get('officialIspPath', '').trim();
+  if (!exe || !fs.existsSync(exe)) throw new Error('请设置 stcToolkit.officialIspPath。');
+  cp.spawn(exe, [], { detached:true, stdio:'ignore', windowsHide:false }).unref();
 }
 
 async function buildFlash() {
@@ -274,11 +224,8 @@ async function showInfo() {
   const p = await findProject();
   const i = parseProjectDevice(p);
   const fw = await newestFirmware().catch(()=>null);
-  const backend = resolveBackend(i);
-  const stcgal = suggestedProtocol(i);
-  vscode.window.showInformationMessage(
-    `Target: ${i.target || '-'} | Device: ${i.device || '-'} | Family: ${i.family} | Backend: ${backend} | stcgal: ${stcgal}${fw ? ` | FW: ${path.basename(fw)}` : ''}`
-  );
+  const suggested = suggestedProtocol(i.family);
+  vscode.window.showInformationMessage(`Target: ${i.target || '-'} | Device: ${i.device || '-'} | Family: ${i.family} | stcgal: ${suggested}${fw ? ` | FW: ${path.basename(fw)}` : ''}`);
 }
 
 function safe(fn) {
@@ -293,11 +240,10 @@ function safe(fn) {
 }
 
 function activate(context) {
-  extensionPath = context.extensionPath;
   output = vscode.window.createOutputChannel('STC Toolkit');
   status = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 50);
   status.text = '$(chip) STC';
-  status.tooltip = 'STC Toolkit — Build & Flash';
+  status.tooltip = 'STC Toolkit — 点击执行 Build & Flash';
   status.command = 'stcToolkit.buildFlash';
   status.show();
 
@@ -308,7 +254,6 @@ function activate(context) {
     'stcToolkit.buildFlash': buildFlash,
     'stcToolkit.selectPort': selectPort,
     'stcToolkit.selectFirmware': selectFirmware,
-    'stcToolkit.selectBackend': chooseBackend,
     'stcToolkit.openOfficialIsp': openOfficialIsp,
     'stcToolkit.showInfo': showInfo
   };
